@@ -1,0 +1,29 @@
+Warning: React does not recognize the &#x60;indicatorClassName&#x60; prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase &#x60;indicatorclassname&#x60; instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+    at div
+    at https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DJ45QH6S.js?v=cf706dcc:41:13
+    at Provider (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-progress.js?v=cf706dcc:30:15)
+    at https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-progress.js?v=cf706dcc:90:7
+    at _c (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/src/components/ui/progress.tsx:21:11)
+    at div
+    at div
+    at div
+    at div
+    at PresaleTimer (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/src/components/presale-timer.tsx:26:45)
+    at div
+    at Home
+    at Route (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=cf706dcc:191:16)
+    at Switch (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=cf706dcc:247:17)
+    at Router
+    at main
+    at div
+    at MainLayout (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/src/components/layouts/main-layout.tsx?t=1744183875621:19:38)
+    at AuthProvider (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/src/hooks/use-auth.tsx:26:32)
+    at QueryClientProvider (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-YLTKP27R.js?v=cf706dcc:2805:3)
+    at App
+    at QueryClientProvider (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-YLTKP27R.js?v=cf706dcc:2805:3)
+    at Hydrate (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wagmi.js?v=cf706dcc:204:11)
+    at WagmiProvider (https://63379ad4-3292-49b1-8172-118a990667ea-00-1z1ubtywf1qrn.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wagmi.js?v=cf706dcc:228:11)
+WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 2 times.
+Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+Cannot convert undefined or null to object
+Cannot convert undefined or null to object

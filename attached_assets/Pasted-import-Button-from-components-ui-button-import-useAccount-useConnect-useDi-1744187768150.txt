@@ -1,0 +1,151 @@
+import { Button } from "@/components/ui/button";
+import { 
+  useAccount, 
+  useConnect, 
+  useDisconnect,
+  type Connector
+} from "wagmi";
+import { shortenAddress } from "@/lib/utils";
+import { isMobile } from "@/lib/wagmi";
+import { Wallet, ArrowRight, Copy, LogOut, ExternalLink, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+export default function WalletConnectButton() {
+  const { address, isConnected } = useAccount();
+  const { connect, connectors, isPending } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { toast } = useToast();
+  const [isUserOnMobile, setIsUserOnMobile] = useState(false);
+  
+  const getConnectorName = (connector: Connector): string => {
+    return typeof connector.name === 'string' ? connector.name : 'Wallet';
+  };
+
+  const getWalletIcon = (connectorName: string) => {
+    if (connectorName.includes("MetaMask")) {
+      return (
+        <svg width="20" height="20" viewBox="0 0 35 33" fill="none" className="mr-2">
+          {/* MetaMask SVG */}
+        </svg>
+      );
+    }
+    // Other icons...
+  };
+  
+  useEffect(() => {
+    setIsUserOnMobile(isMobile());
+  }, []);
+  
+  const copyAddressToClipboard = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      toast({
+        title: "Address copied",
+        description: "Wallet address copied to clipboard",
+      });
+    }
+  };
+
+  const handleMetamaskConnect = async () => {
+    const metamaskConnector = connectors.find(c => 
+      c.name.includes("MetaMask") && c.ready
+    );
+
+    if (!metamaskConnector) {
+      toast({
+        title: "MetaMask Required",
+        description: "Please install MetaMask to continue",
+        variant: "destructive"
+      });
+      window.open('https://metamask.io/download/', '_blank');
+      return;
+    }
+
+    try {
+      await connect({ 
+        connector: metamaskConnector,
+        chainId: 56 // BSC Mainnet
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Please check MetaMask and try again",
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (isConnected && address) {
+    return (
+      // Connected wallet dropdown UI
+    );
+  }
+
+  // Mobile users get a direct MetaMask button
+  if (isUserOnMobile) {
+    return (
+      <Button 
+        onClick={handleMetamaskConnect}
+        className="ml-4 px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white text-sm font-medium 
+                  shadow-[0_0_15px_rgba(79,70,229,0.5)] transition-all duration-300 flex items-center"
+        disabled={isPending}
+      >
+        <Wallet className="mr-2 h-4 w-4" />
+        {isPending ? "Connecting..." : "Connect MetaMask"}
+      </Button>
+    );
+  }
+
+  // Desktop users get wallet selection dropdown
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          className="ml-4 px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white text-sm font-medium 
+                    shadow-[0_0_15px_rgba(79,70,229,0.5)] transition-all duration-300 flex items-center"
+        >
+          <Wallet className="mr-2 h-4 w-4" />
+          Connect Wallet
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="bg-gradient-to-b from-[#1E293B] to-[#0F172A] border border-gray-700 shadow-xl shadow-black/20 rounded-xl overflow-hidden min-w-[200px]">
+        <DropdownMenuLabel className="text-sm font-semibold text-center text-gray-400 pb-2 pt-3">
+          Select Wallet
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator className="bg-gray-700/50" />
+        {connectors.map((connector) => {
+          const connectorName = getConnectorName(connector);
+          return (
+            <DropdownMenuItem
+              key={connector.uid}
+              disabled={!connector.ready}
+              className="text-[#F8FAFC] cursor-pointer hover:bg-primary/10 flex items-center py-3 px-4"
+              onClick={() => connect({ connector })}
+            >
+              <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center mr-3 border border-gray-700">
+                {getWalletIcon(connectorName)}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">{connectorName}</p>
+                <p className="text-xs text-gray-400">
+                  {connector.ready ? "Ready to connect" : "Not available"}
+                </p>
+              </div>
+              {connector.ready && <ArrowRight className="ml-auto h-4 w-4 text-gray-400" />}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

@@ -1,0 +1,315 @@
+import { useState, useEffect } from "react";
+import { useAccount, useConnect, useDisconnect, useEnsAvatar, useEnsName, useChainId } from "wagmi";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { truncateAddress } from "@/lib/utils";
+import { isMobile } from "@/hooks/use-mobile";
+import { mainnet, goerli, sepolia } from "wagmi/chains";
+import { metaMask } from "wagmi/connectors";
+import { ramestta } from "@/lib/wagmi";
+
+// Helper function to get chain name from chain ID
+const getChainName = (chainId: number | undefined): string => {
+  if (!chainId) return "Unknown Network";
+  
+  if (chainId === ramestta.id) return "RAMESTTA Network";
+  if (chainId === mainnet.id) return "Ethereum Mainnet";
+  if (chainId === goerli.id) return "Goerli Testnet";
+  if (chainId === sepolia.id) return "Sepolia Testnet";
+  
+  return "Unknown Network";
+};
+
+export default function WalletConnector() {
+  const { address, isConnected } = useAccount();
+  const { connectAsync, isPending } = useConnect();
+  const { disconnectAsync } = useDisconnect();
+  const chainId = useChainId();
+  const { data: ensName } = useEnsName({ address });
+  const { data: ensAvatar } = useEnsAvatar({ name: ensName! });
+  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
+  const mobile = isMobile();
+
+  // Reset error when connection state changes
+  useEffect(() => {
+    if (isConnected) {
+      setError(null);
+    }
+  }, [isConnected]);
+
+  // const handleConnect = async () => {
+  //   try {
+  //     setError(null);
+  //     const connector = metaMask();
+  //     await connectAsync({ connector });
+  //   } catch (err: any) {
+  //     console.error("Connection error:", err);
+  //     setError(err?.message || "Failed to connect wallet");
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Connection failed",
+  //       description: err?.message || "Could not connect to MetaMask",
+  //     });
+  //   }
+  // };
+
+  // RAMESTTA Network Configuration
+const ramestta = {
+  id: 1370,
+  name: "RAMESTTA",
+  network: "ramestta",
+  nativeCurrency: {
+    name: "RAMA",
+    symbol: "RAMA",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: { http: ["https://blockchain.ramestta.com"] },
+  },
+  blockExplorers: {
+    default: { name: "Ramascan", url: "https://ramascan.com/" },
+  },
+};
+
+// Updated chain name helper
+const getChainName = (chainId: number | undefined): string => {
+  if (!chainId) return "RAMESTTA Network";
+  
+  if (chainId === ramestta.id) return "RAMESTTA Network";
+  if (chainId === mainnet.id) return "Ethereum Mainnet";
+  if (chainId === goerli.id) return "Goerli Testnet";
+  if (chainId === sepolia.id) return "Sepolia Testnet";
+  
+  return "RAMESTTA Network"; // Default for all other networks
+};
+  const handleConnect = async () => {
+    try {
+      setError(null);
+      const connector = metaMask();
+      
+      // Connect to MetaMask
+      await connectAsync({ connector });
+
+      // Add RAMESTTA network if not present
+      await window.ethereum?.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: `0x${ramestta.id.toString(16)}`,
+          chainName: ramestta.name,
+          nativeCurrency: ramestta.nativeCurrency,
+          rpcUrls: ramestta.rpcUrls.default.http,
+          blockExplorerUrls: [ramestta.blockExplorers.default.url],
+        }],
+      });
+
+      // Switch to RAMESTTA network
+      await connector.switchChain?.(ramestta);
+
+    } catch (err: any) {
+      console.error("Connection error:", err);
+      setError(err?.message || "Failed to connect wallet");
+      toast({
+        variant: "destructive",
+        title: "Connection failed",
+        description: err?.message || "Could not connect to MetaMask",
+      });
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      await disconnectAsync();
+      toast({
+        title: "Wallet disconnected",
+        description: "Your wallet has been disconnected successfully",
+      });
+    } catch (err: any) {
+      console.error("Disconnect error:", err);
+      toast({
+        variant: "destructive",
+        title: "Disconnect failed",
+        description: err?.message || "Could not disconnect wallet",
+      });
+    }
+  };
+
+  const copyAddressToClipboard = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      toast({
+        title: "Address copied",
+        description: "Wallet address copied to clipboard",
+      });
+    }
+  };
+
+  return (
+    <Card className="overflow-hidden border border-gray-100">
+      {/* Connection Status */}
+      <div className="p-6 pb-4 border-b border-gray-100">
+        {!isConnected ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-gray-300 rounded-full mr-2"></div>
+              <span className="text-gray-600 font-medium">Not connected</span>
+            </div>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-800">
+              Disconnected
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-success rounded-full mr-2 animate-pulse"></div>
+              <span className="text-gray-800 font-medium">Connected</span>
+            </div>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-success">
+              Active
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Main Content Area */}
+      <div className="p-6">
+        {/* Disconnected View */}
+        {!isConnected && !isPending && (
+          <div className="text-center py-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Connect Your Wallet</h2>
+            <p className="text-gray-600 mb-6">Connect your MetaMask wallet to access the application</p>
+            
+            <Button
+              onClick={handleConnect}
+              className="w-full flex items-center justify-center px-4 py-6 text-base font-medium text-white bg-primary hover:bg-secondary transition-colors"
+            >
+              Connect MetaMask
+            </Button>
+            
+            <div className="mt-4 text-sm text-gray-500">
+              New to MetaMask?{" "}
+              <a 
+                href="https://metamask.io/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:text-secondary underline"
+              >
+                Download here
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Connected View */}
+        {isConnected && (
+          <div className="space-y-6">
+            <div className="flex flex-col space-y-2">
+              <label className="text-sm font-medium text-gray-700">Connected Account</label>
+              <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
+                <div className="flex items-center space-x-2 overflow-hidden">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                    {ensAvatar ? (
+                      <img src={ensAvatar} alt="ENS Avatar" className="w-8 h-8 rounded-full" />
+                    ) : (
+                      <span className="text-xs font-medium text-primary">
+                        {address?.substring(2, 4).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-mono text-sm truncate">
+                    {ensName || truncateAddress(address || "")}
+                  </span>
+                </div>
+                <button 
+                  onClick={copyAddressToClipboard}
+                  className="text-gray-500 hover:text-primary transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col space-y-2">
+              <label className="text-sm font-medium text-gray-700">Network</label>
+              <div className="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
+                <div className="w-3 h-3 rounded-full bg-success"></div>
+                <span className="text-sm text-gray-800">
+                  {getChainName(chainId) || "Unknown Network"}
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <Button
+                onClick={handleDisconnect}
+                variant="outline"
+                className="w-full flex items-center justify-center px-4 py-3 text-base font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              >
+                Disconnect Wallet
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {isPending && (
+          <div className="py-12 text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            <p className="mt-4 text-gray-600">Connecting to wallet...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-error" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-error">Connection Error</h3>
+                <div className="mt-2 text-sm text-red-600">
+                  {error}
+                </div>
+                <div className="mt-3">
+                  <Button
+                    onClick={handleConnect}
+                    variant="destructive"
+                    className="inline-flex items-center px-3 py-2 text-sm leading-4 font-medium rounded-md text-white"
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Info Banner */}
+      <div className="p-4 bg-indigo-50 border-t border-indigo-100">
+        <div className="flex items-start">
+          <div className="flex-shrink-0 pt-0.5">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3 flex-1 text-sm text-indigo-800">
+            <p>For mobile devices, you'll be redirected to the MetaMask app if installed.</p>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}

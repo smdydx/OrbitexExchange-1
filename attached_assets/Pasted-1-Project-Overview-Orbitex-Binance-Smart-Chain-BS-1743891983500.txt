@@ -1,0 +1,134 @@
+1. Project Overview
+
+Orbitex एक क्रिप्टो टोकन इन्वेस्टमेंट प्लेटफॉर्म है, जो Binance Smart Chain (BSC) पर आधारित होगा। यह प्लेटफॉर्म टोकन सेल, स्टेकिंग, मैट्रिक्स लेवल इनकम और रिवार्ड सिस्टम प्रदान करता है। यह Django और Python के बैकएंड सपोर्ट के साथ Solidity का उपयोग करके स्मार्ट कॉन्ट्रैक्ट डेवेलप करेगा।
+
+2. Technology Stack
+
+Frontend:
+
+Django (Template System)
+
+HTML, CSS, Bootstrap
+
+JavaScript (Web3.js for blockchain interaction)
+
+
+Backend:
+
+Django REST Framework (API Development)
+
+PostgreSQL / MySQL (Database Management)
+
+Celery + Redis (Background Jobs Processing)
+
+Web3.py (Blockchain Communication)
+
+
+Blockchain (Smart Contracts):
+
+Solidity (Binance Smart Chain Smart Contract Development)
+
+Remix IDE (Smart Contract Testing & Deployment)
+
+BSCScan API (For Contract Verification & Monitoring)
+
+Binance Testnet/Mainnet (For Deployment & Testing)
+
+
+
+---
+
+3. Project Modules
+
+(A) User Authentication & Dashboard
+
+User Sign-Up, Login (Django Auth System)
+
+Dashboard for Token Balance & Staking Status
+
+Metamask/WalletConnect Integration
+
+
+(B) Token Sale & Purchase Module
+
+Users can purchase OBX Tokens using BNB
+
+Live Token Price Display (Django + Web3.js)
+
+BEP-20 Smart Contract Interaction for Transactions
+
+
+(C) Token Staking System
+
+Users can stake OBX Tokens for different durations
+
+Reward Calculation based on Staking Period
+
+Smart Contract for Locking Tokens & Distributing Rewards
+
+
+(D) Matrix Level Income System
+
+Multi-Level Referral Commission
+
+Automated Reward Distribution Using Django Celery
+
+Commission Percentage as per Rank & Level
+
+
+(E) Admin Panel (Django Admin)
+
+Manage Users & Transactions
+
+Token Sale Analytics & Reports
+
+Smart Contract Deployment Control
+
+
+
+---
+
+4. Smart Contract Development (Solidity + Remix)
+
+(A) Orbitex Token (BEP-20 Contract)
+
+Name: Orbitex Token (OBX)
+
+Total Supply: 10 Million OBX
+
+Transfer, Approve, Mint & Burn Functions
+
+
+Sample Code:
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract OrbitexToken is ERC20 {
+    address public owner;
+    
+    constructor() ERC20("Orbitex Token", "OBX") {
+        owner = msg.sender;
+        _mint(msg.sender, 10000000 * 10 ** decimals());
+    }
+}
+
+(B) Token Sale Contract
+
+Buy Tokens Using BNB
+
+Set Different Prices in Pre-Sale Rounds
+
+Automated Distribution of Purchased Tokens
+
+
+(C) Staking Contract
+
+Lock OBX Tokens for Fixed Time
+
+Reward Calculation in Smart Contract
+
+Withdraw Rewards After Lock Period
+
