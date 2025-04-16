@@ -118,7 +118,7 @@ export default function HeroSection() {
 
             <div className="absolute -bottom-5 -right-5 bg-[#1E293B] p-4 rounded-lg border border-gray-700 shadow-[0_0_15px_rgba(79,70,229,0.5)]">
               <div className="text-sm text-[#94A3B8]">ORBITEX LIVE PRICE</div>
-              <div className="text-2xl font-bold text-[#F8FAFC] mt-1">1 USDT = 0.50 OBX</div>
+              <div className="text-2xl font-bold text-[#F8FAFC] mt-1">1 USDT = 0.05 OBX</div>
             </div>
           </div>
         </div>
